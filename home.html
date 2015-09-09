@@ -1,0 +1,536 @@
+<!DOCTYPE html> 
+<html>
+<head>
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+     <title>Home</title>
+		<script src="js/jquery-1.10.2.min.js"></script>
+		<script src="js/jquery.mobile-1.4.3.min.js"></script>
+		<script src="js/responsiveslides.min.js"></script>
+		<script charset="utf-8" src="js/apiomat.js"></script>
+		<script src="js/textEffect.jquery.js"></script>
+		<script src="js/jquery.blockUI.js"></script>
+		<script src="js/jquery.cycle.all.js"></script>
+		<script src="js/jquery.easing.1.3.js"></script>		
+		<link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.3.min.css"> 
+		<link media="screen" rel="stylesheet" type="text/css" href="css/style.css">
+		<link rel="stylesheet" href="css/ucone.min.css"/> 	
+		<link rel="stylesheet" href="css/jqm-demos.css">
+		<link rel="stylesheet" href="css/demo.css">
+	  	 	 
+  <!-- Pengecekan Aplikasi dengan Device -->
+  <script type="text/javascript" charset="utf-8" src="js/cordova.js"></script>
+        <script type="text/javascript" charset="utf-8">
+	// Wait for Cordova to load
+	function init() {
+        document.addEventListener("deviceready", onDeviceReady, false);
+    }
+	// Cordova is ready
+    function onDeviceReady() {
+		console.log("Aplikasi Siap...");
+		document.addEventListener("backbutton", doClose, false);
+		checkConnection();
+	}	
+	// Notiv Keluar
+	function doClose() {
+		navigator.notification.confirm(
+			'Keluar dari Aplikasi ?',
+			exitApp,
+			'PO Bus Pariwisata DKI Jakarta',
+			'Cancel,Ok'
+		);
+	}
+	function exitApp(buttonIndex) {
+			if (buttonIndex == 2) {
+			navigator.app.exitApp();
+			}
+		else {
+			window.close();
+		}
+	}
+	
+	    function checkConnection() {
+            var _check=true;
+			var networkState = navigator.connection.type;
+            var states = {};
+            states[Connection.UNKNOWN]  = 'Unknown connection';
+            states[Connection.ETHERNET] = 'Ethernet connection';
+            states[Connection.WIFI]     = 'WiFi connection';
+            states[Connection.CELL_2G]  = 'Cell 2G connection';
+            states[Connection.CELL_3G]  = 'Cell 3G connection';
+            states[Connection.CELL_4G]  = 'Cell 4G connection';
+            states[Connection.CELL]     = 'Cell generic connection';
+            states[Connection.NONE]     = 'No network connection';
+
+        //alert('Connection type: '+ networkState + states[networkState]);
+        if(networkState==='unknown'){
+            _check=false;
+            showAlert();
+            return _check;
+        }
+        else {
+            return true;
+			}
+		}
+    function showAlert() {
+        navigator.notification.alert("Coba Lagi Nanti..",onDeviceReady,"Perangkat tidak terkoneksi internet","OK");
+    }
+	
+	//Fungsi Menunggu;
+	function wait() {
+	$(document).ready(function() { 
+        $.blockUI({ css: { 
+            border: 'none', 
+            padding: '15px', 
+            backgroundColor: '#000', 
+            '-webkit-border-radius': '10px', 
+            '-moz-border-radius': '10px', 
+            opacity: .5, 
+            color: '#fff' 
+        } }); 
+         setTimeout($.unblockUI, 2000); 
+    });   
+	}
+	
+</script>
+</head> 
+<body onload="init();signup();wait();">
+<p id="name" style="display:none"></p>	
+<div data-role="page" id="home" data-theme="a"  class="jqm-demos jqm-home" >
+<!-- Header -->												
+	<div data-role="header" class="jqm-header">
+	<a href="#nav-panel" data-icon="grid"  data-ajax="false" data-iconpos="notext"></a>
+	<a href="#" onClick="window.location.reload()" data-icon="refresh" data-ajax="false" data-iconpos="notext"></a><div>
+	<h2 style="white-space: normal;" aria-level="1" role="heading" class="ui-title"><img src="image/iconbus.png"></h2>
+	<h2 style="white-space: normal;font-weight:bold;font-style:italic;color:#FFAC30;" aria-level="1" role="heading" class="ui-title" id="texthead">
+	INFO PO BUS PARIWISATA</h2>	</div></div>
+	<div role="main" data-theme="b"  class="ui-content jqm-content" align="center" style="background-image:url('image/'); background-attachment: fixed; background-repeat: repeat;"  >
+
+<!-- Slider -->
+	<div class="slide" id="tes"></div>
+	
+<!-- ListView Po BUS PARIWISATA-->
+<p style="display:none" >Clicks:  <a id="clicks" >1</a></p>
+<ul id="listpo" data-role="listview" data-filter="true" data-filter-placeholder="Cari Po/Alamat Bus Pariwisata..." ></ul>
+<div class="ui-body-d ui-content">
+<img src="image/loading2.gif" width="60px" height="60px" id="loading_gmb"></div>
+<a href="#" data-ajax="false" onclick=" clearTable();clickME();" id="showMore" class="ui-btn  ui-mini ui-corner-all ui-btn-icon-left ui-icon-plus" 
+style="display:none" >Show more</a>
+<!-- footer -->
+	<div data-theme="a" data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
+		<p>Po Bus Pariwisata DKI Jakarta <span class="jqm-version"></span></p>
+		<p>Copyright 2014 UC Development </p>
+	</div>
+</div>
+
+
+ <!-- Panel -->
+<div data-role="panel" data-position-fixed="true" data-display="overlay" id="nav-panel">
+		<ul data-role="listview" data-inset="true">
+        <li>  <a id="formbus" href="" onClick="clearAll();"data-ajax="false" class="ui-btn  ui-mini ui-corner-all ui-btn-icon-left ui-icon-search" data-transition="slidedown">Cari Kendaraan Pariwisata</a>
+		</li>
+		<li><a href="#bantuan" data-ajax="false" class="ui-btn  ui-mini ui-corner-all ui-btn-icon-left ui-icon-alert" data-transition="slide">Bantuan</a>
+        </li>
+        <li><a href="#tentang" data-ajax="false" class="ui-btn  ui-mini ui-corner-all ui-btn-icon-left ui-icon-info" data-transition="slidefade">Tentang</a>
+        </li>
+		<li><a href="#" data-ajax="false" onclick="doClose()" data-role="button" class="ui-btn  ui-mini ui-corner-all ui-btn-icon-left ui-icon-delete">Keluar</a></li>
+		<div data-theme="a" data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
+		<p>Copyright 2014 UC Development </p>
+		</div>
+	</div>
+</div>
+
+
+<!--MENU bantuan-->
+	<div  id="bantuan" data-role="page" id="page" data-theme="a"  class="jqm-demos jqm-home"  >																																						
+<!-- /header -->
+	<div data-role="header" class="jqm-header">	<div>
+	<h2 style="white-space: normal;" aria-level="1" role="heading" class="ui-title"><img src="image/help.png"  ></h2>
+	<h2 style="white-space: normal;font-weight:bold;font-style:italic;" aria-level="1" role="heading" class="ui-title">BANTUAN</h2>
+	</div>
+    <a href="#home" data-icon="home" data-ajax="false" data-iconpos="notext"></a></div>
+	<div role="main" data-theme="b"  class="ui-content jqm-content" align="center" style="background-image:url('image/'); background-attachment: fixed; background-repeat: repeat;"  >
+	
+	
+	<div id="detail" class="ui-body-d ui-content" style="font-weight: bold";>
+	<h2 style="font-weight:bold">Home</h2>
+	<img src="image/bantuan1.jpg"><br><br>
+	<p style="text-align:justify;color:yellow;">Nomor 1 : <i style="color:white;">Tombol ini adalah tombol menu panel, terdapat pilihan Cari kendaraan pariwisata, bantuan, tentang dan keluar dari aplikasi. </i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 2 : <i style="color:white;">Tombol ini digunakan untuk memuat ulang (Refresh) halaman home.</i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 3 : <i style="color:white;">Bagian ini digunakan untuk melakukan pencarian Nama PO Bus atau Alamatnya.</i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 4 : <i style="color:white;">list ini dapat digunakan untuk masuk ke halaman kendaraan yang dimiliki po bus lebih spesifik mengenai kendaraan dari PO Bus yang dipilih.</i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 5 : <i style="color:white;">Tombol Show more ini digunakan untuk menambah sebanyak 4 buah List Nama PO Bus baru yang ada di database.</i></p>
+	<hr></hr><br> 
+	
+	<h2 style="font-weight:bold">Cari Kendaraan Pariwisata</h2>
+	<img src="image/bantuan2.jpg"><br><br>
+	<p style="text-align:justify;color:yellow;">Halaman ini digunakan untuk melakukan pencarian lebih spesifik sesuai kriteria yang sudah ditentukan.<br>
+	<p style="text-align:justify;color:yellow;">Nomor 1 : <i style="color:white;">Tombol ini adalah tombol untuk kembali ke halaman menu utama atau home. </i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 2 : <i style="color:white;">List Box ini digunakan untuk memilih kriteria Jenis Kendaraan.</i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 3 : <i style="color:white;">List Box ini digunakan untuk memilih kriteria Kapasitas Kendaraan.</i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 4 : <i style="color:white;">Tombol ini digunakan untuk melakukan pencarian sesuai kriteria yang ditentukan.</i></p>
+	<hr></hr><br> 
+	
+	<h2 style="font-weight:bold">Kendaraan PO Bus</h2>
+	<img src="image/bantuan3.jpg"><br><br>
+	<p style="text-align:justify;color:yellow;">Nomor 1 : <i style="color:white;">Tombol ini adalah tombol untuk kembali ke halaman menu utama atau home. </i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 2 : <i style="color:white;">Tombol ini digunakan untuk memuat ulang (Refresh) halaman Kendaraan PO Bus.</i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 3 : <i style="color:white;">Bagian ini digunakan untuk melakukan pencarian Jenis Kendaraan atau Fasilitasnya.</i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 4 : <i style="color:white;">list ini dapat digunakan untuk masuk ke halaman Detail kendaraan yang dimiliki kendaraan secara lebih detail.</i></p>
+	<hr></hr><br> 
+	
+	<h2 style="font-weight:bold">Detail Po Bus Pariwisata</h2>
+	<img src="image/bantuan4.jpg"><br><br>
+	<p style="text-align:justify;color:yellow;">Nomor 1 : <i style="color:white;">Tombol ini adalah tombol untuk kembali ke halaman kendaraan Po Bus.</i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 2 : <i style="color:white;">Tombol ini adalah tombol untuk kembali ke halaman menu utama atau home.</i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 3 : <i style="color:white;">Bagian Slide Show ini, dapat menggantikan fungsi Refresh jika disentuh.</i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 4 : <i style="color:white;">Bagian Nav Bar Detail ini digunakan untuk menampilkan detail dari kendaraan yang sudah dipilih.</i><br> 
+	<p style="text-align:justify;color:yellow;">Nomor 5 : <i style="color:white;">Bagian Nav Bar Lokasi ini digunakan untuk menampilkan Maps atau lokasi Po Bus berada, dan jika disentuh bagian map-marker nya, maka akan muncul alamat lengkap dari Po Bus tersebut.</i></p>
+	<p style="text-align:justify;color:yellow;">Nomor 6 : <i style="color:white;">Bagian Nav Bar Kontak ini digunakan untuk menampilkan kontak telepon, fax dan email dari Po Bus, list ini bisa terintegrasi dengan kontak dan email yang ada pada smartphone.</i><br>
+	<p style="text-align:justify;color:yellow;">Nomor 7 : <i style="color:white;">Bagian harga ini menampilkan harga dalam bentuk gambar yang bisa diperbesar (zoom-in) atau diperkecil (Zoom-out).</i><br>
+	<p style="text-align:justify;color:yellow;">Nomor 8 : <i style="color:white;">Bagian teks itu memberikan tanda adanya perubahan data terakhir yang dilakukan oleh database.</i><br>
+	</div>
+    </div>
+<!-- /footer -->
+	<div data-theme="a" data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
+		<p>Po Bus Pariwisata DKI Jakarta <span class="jqm-version"></span></p>
+		<p>Copyright 2014 UC Development </p>
+	</div>
+	</div>
+ 
+ 
+<!--MENU tentang-->
+	<div  id="tentang" data-role="page" id="page" data-theme="a"  class="jqm-demos jqm-home"  >																																						
+<!-- /header -->
+	<div data-role="header" class="jqm-header">	<div>
+	<h2 style="white-space: normal;" aria-level="1" role="heading" class="ui-title"><img src="image/info.png"  ></h2>
+	<h2 style="white-space: normal;font-weight:bold;" aria-level="1" role="heading" class="ui-title" >TENTANG</h2>
+	</div><a href="#home" data-icon="home" data-ajax="false" data-iconpos="notext"></a>
+    </div>
+ 	<div role="main" data-theme="a"  class="ui-content jqm-content" align="center" style="background-image:url('image/background.jpg'); background-attachment: fixed; background-repeat: repeat;"  >
+	<div id="detail" class="ui-body-d ui-content" style="font-weight: bold";>
+        <h2 style="text-align:justify;color:yellow;font-style:italic;font-size:14px;"><li>
+		<b style="color:white;font-size:16px;">Deskripsi:</b>
+		Aplikasi Sistem Informasi PO BUS PARIWISATA DKI JAKARTA ini berisi informasi mengenai Perusahaan Otobus Pariwisata atau PO Bus Pariwisata beserta fasilitas kendaraan yang dimiliki oleh PO Bus khusus daerah DKI JAKARTA.</li><br><br><li>
+		<b style="color:white;font-size:16px;">Tujuan:</b> Untuk mempermudah para pengguna fasilitas BUS atau Kendaraan pariwisata dalam mencari, memilih, dan menentukan pilihan Kendaraan apa dan Perusahaan Otobus mana yang akan dipilih untuk berwisata khususnya untuk masyarakat di DKI JAKARTA</li><br><br><li>
+		<b style="color:white;font-size:16px;">Fitur:</b> Terdapat informasi Nama PO Bus Pariwisata, Alamat, Kontak, Fasilitas Mobil, Map dan *Harga.</li><br>
+		<b style="color:white;font-size:14px;">Kritik, Saran Aplikasi, dan Pemasangan Iklan PO.</b><br>
+		<a href="mailto:hidayat.ahmad896@gmail.com"><img src="image/email.png" align="left" width="45px" height="45px" /><br><b style="color:white;font-size:14px;"><u>email: hidayat.ahmad896@gmail.com</u></b></a>
+		<br><br><b>By: UC Development</b></li></h2>
+		</div>
+    </div>
+ 
+ <!-- /footer -->
+	<div data-theme="a" data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
+		<p>Po Bus Pariwisata DKI Jakarta <span class="jqm-version"></span></p>
+		<p>Copyright 2014 UC Development </p>
+	</div>
+	</div>
+	
+<!--////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->	
+	
+	<!-- MENU FORM BUS -->
+<div  data-role="page" id="formbus" data-theme="a"  class="jqm-demos jqm-home"  >													
+	<div data-role="header" class="jqm-header"   >
+	<div>
+	<h2 style="white-space: normal;" aria-level="1" role="heading" class="ui-title"><img src="image/iconbus.png"  ></h2>
+	<h2 style="white-space: normal;font-weight:bold;" aria-level="1" role="heading" class="ui-title">CARI KENDARAAN PARIWISATA</h2>	
+	</div><a href="#home" data-icon="home" data-ajax="false" data-iconpos="notext"></a>
+	</div>
+	<div role="main" data-theme="b"  class="ui-content jqm-content" align="center" style="background-image:url('image/'); background-attachment: fixed; background-repeat: repeat;"  >
+ 
+ <!--Slider-->
+	<div class="slide" id="tes2"> </div>
+	
+<!-- Page Form Bus -->
+	<div data-role="main" class="ui-form" >			
+		<div class="ui-field-contain">
+		<label for="select-choice-a" class="select">JENIS KENDARAAN :</label>
+		<select name="select-choice-a" id="jkend" data-native-menu="false" width="80px">
+			<option>BUS/MICROBUS/MOBIL PRIBADI</option>
+            <option value="">KELUARGA</option>
+			<option value="">MICRO BUS</option>
+            <option value="">MEDIUM BUS</option>
+            <option value="">BIG BUS</option>
+        </select>
+		<label for="select-choice-a" class="select">KAPASITAS :</label>
+		<select name="select-choice-a" id="kps" data-native-menu="false" width="80px">
+			<option>JUMLAH KURSI</option>
+            <option value="6">6 -14 Seat</option>
+			<option value="1">14-19 Seat</option>
+            <option value="2">20-29 Seat</option>
+            <option value="3">30-39 Seat</option>
+            <option value="4">40-49 Seat</option>
+            <option value="5">50-59 Seat</option>
+        </select>
+        </div>
+      <input onClick="clearForm()" id="cari" type="submit" data-inline="true" value="CARI">
+	  <hr></hr>
+	  <p id="hasil" style="text-align:justify;color:yellow;font-weight:bold;font-style:italic;font-size:16px;"></p>
+		<p id="carijkend" style="display:none"></p>
+        <p id="carikps" style="display:none"></p>
+      <ul id="autocomplete" data-role="listview"></ul>
+  	</div>
+	<!-- /footer -->
+	<div data-theme="a" data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
+		<p>Po Bus Pariwisata DKI Jakarta <span class="jqm-version"></span></p>
+		<p>Copyright 2014 UC Development </p>
+	</div>
+	</div>
+</div>
+  
+
+<!-- BAGIAN DATABASE
+Catatan:
+1. Untuk nama table, huruf awal harus Besar
+2. Untuk pemanggilan field lebih dari satu, beri imbuhan "s"
+3. Perhatikan penulisan table dan field secara teliti
+-->   
+<script>
+<!--Fungsi sinkronisasi ke data awan-->
+
+  function signup()
+  {
+    var user = new Apiomat.User();
+    user.setUserName("_username_");
+    user.setPassword("_password_");
+    Apiomat.Datastore.configure(user);
+	
+    var saveCB = {
+      onOk: function() {
+        statusField.innerHTML = "Saved user successfully";
+        
+      },
+      onError: function(error) {
+	   showAlert();
+        statusField.innerHTML = "Some error occured. "+ error.statusCode + " --> " + error.message;
+      }
+    };
+    user.loadMe({
+      onOk: function() {
+		    loadPages();	
+		    loadPages2();	
+      },
+      onError: function(error) {
+        user.save(saveCB);
+      }
+    });
+  }
+ 
+<!--Menampilkan/query data dari Class/table Po_bus-->
+ 
+	function loadPages()
+  {
+    Apiomat.Po_bus.getPo_buss(undefined, 
+    {
+    onOk:function(bases) 
+	{
+    var clicks = bases.length - count ;
+        if ( clicks < 0) { 
+      	 for (var i=0; i < bases.length;i++) {
+          addToPageBus(bases[i]);       
+        }
+      }
+      else {    
+      	for (var i=clicks; i < bases.length;i++) {
+          addToPageBus(bases[i]);    
+        }
+      }
+	},
+  onError: function(error) {
+    status.innerHTML = "Can't load list: "+ error.statusCode + " --> " + error.message;
+	showAlert();
+		}
+	});
+  }
+
+  <!--Melakukan Query data-->
+ function addToPageBus(base)
+  {
+		var tes = document.getElementById("tes");
+		var img= document.createElement("img");img.src = base.getIconURL();
+		img.style.background="url('image/noimage.png') center no-repeat ";
+		tes.appendChild(img);
+		$('#tes').cycle({ 
+		fx:      'scrollLeft', 
+		timeout:  3000, 
+		easing:  'easeInOutBack'
+		});
+	var sM = document.getElementById("showMore");
+	sM.style.display=(sM.style.display!='none')?'visible':'';  
+	
+	var ldg = document.getElementById("loading_gmb");
+	ldg.style.display='none';  
+	
+	var listpo = document.getElementById("listpo");
+    var option2 = document.createElement("li");
+    option2.style.textAlign = 'center'; 
+    option2.className = "ui-first-child ui-last-child ui-li-has-thumb "; 
+    listpo.appendChild(option2);  
+    var result = document.createElement("a");
+    result.className = "ui-btn ui-btn-icon-right ui-icon-carat-r";
+    result.style.color = "#fff";
+    result.style.textAlign = 'left'  
+    option2.appendChild(result); 
+    result.innerHTML = base.getNmpo();
+    result.value = base.getKdpo();
+    var img2 = document.createElement("img");img2.src = base.getIconURL();
+	img2.className = "imgcenter";
+	var p1 = document.createElement("p");
+    p1.innerHTML = "<b>Alamat : </b>"+base.getAlmtpst();
+    result.appendChild(img2);
+    result.appendChild(p1);
+	result.onclick = 	function () {
+    window.location.href ="pobus.html?id="+  result.value ;
+	}   
+}
+
+<!--Menampilkan/query data dari Class/table Detailmobil-->
+  function loadPages2()
+  {
+      Apiomat.Detailmobil.getDetailmobils(undefined, 
+     {
+     
+     onOk:function(mobils) 
+     { for (var i=0; i < mobils.length;i++) 
+     { addToPageMobil(mobils[i]);}
+  },
+  onError: function(error) {
+    status.innerHTML = "Can't load list: "+ error.statusCode + " --> " + error.message;
+	showAlert();
+  }
+  });
+  }
+
+  <!--Melakukan Query data-->
+  function addToPageMobil(mobil)
+  {
+		var tes2 = document.getElementById("tes2");
+		var img= document.createElement("img");img.src = mobil.getGmb1URL();
+		img.style.background="url('image/noimage.png') center no-repeat ";
+		tes2.appendChild(img);
+		$('#tes2').cycle({ 
+		fx:    'scrollDown', 
+		delay: -2000
+		});
+	  	   
+      var formbus = document.getElementById("formbus");
+	  formbus.value = mobil.getKdkend();
+	  formbus.onclick = function () {
+      window.location.href ="home.html#formbus?id=" + formbus.value;
+	  }  
+	  }   
+	  
+<!--Menampilkan/query data sesuai kriteria -->	 
+ 
+	function loadSearch()
+  {   
+     var a =  document.getElementById("carijkend").innerHTML ;
+     var b = document.getElementById("carikps").innerHTML
+     var yf = "jenis like"+'"'+a+'"'+"or"+" "+ "kapasitas startswith"+'"'+b+'"' ;
+     Apiomat.Detailmobil.getDetailmobils( yf, 
+     {
+     onOk:function(searchs)
+     {
+      for (var i=0; i < searchs.length;i++) 
+     { addToSearch(searchs[i]);
+     }
+  },
+  onError: function() {
+    status.innerHTML = "Can't load list: ";
+	showAlert();
+  }
+  });
+  }
+    
+   function addToSearch(search)
+  {
+		var hasil = document.getElementById("hasil");
+		hasil.innerHTML = "HASIL";
+			$(function() {
+			blink('#hasil');
+			})
+			function blink(selector) {
+			$(selector).fadeOut('medium', function() {
+			$(this).fadeIn('medium', function() {
+			blink(this);
+			});	});
+		}		
+		var list2 = document.getElementById("autocomplete");
+		var option2 = document.createElement("li");
+		option2.style.textAlign = 'center'; 
+		option2.className = "ui-first-child ui-last-child ui-li-has-thumb "; 
+		list2.appendChild(option2);      
+		var result = document.createElement("a");
+		result.className = "ui-btn ui-btn-icon-right ui-icon-carat-r";
+		result.style.color = "#fff";
+		result.style.textAlign = 'left'  
+		result.style =  "white-space: normal;";
+		option2.appendChild(result); 
+		result.innerHTML = search.getJenis() +" - "+ search.getKapasitas();
+		result.value = search.getKdkend();
+		var img = document.createElement("img");img.src = search.getGmb1URL();
+		img.className = "imgcenter";
+		var p1 = document.createElement("p");
+		p1.innerHTML = search.getFasilitas();
+		result.appendChild(img);
+		result.appendChild(p1);
+		result.onclick = 	function () {
+		window.location.href ="pobus.html#detail?id="+  result.value ;
+	    }
+	  }
+
+function cari() {
+	var cari = $( "#jkend option:selected" ).text();
+	var test1 = document.getElementById("carijkend").innerHTML= cari;
+	var cari2 = $( "#kps option:selected" ).val();
+	var test2 = document.getElementById("carikps").innerHTML= cari2;
+	loadSearch();
+}
+	
+ <!--Showmore-->
+	 
+		var count = 8;
+         function clickME() {
+          count +=4;
+           document.getElementById("clicks").innerHTML = count;
+           var sM = document.getElementById("showMore");
+           sM.style.display=(sM.style.display!='none')?'none':'';	
+		   wait();
+           loadPages();
+		   }
+            
+          function clearTable()
+          {
+          var table = document.getElementById("listpo");
+          table.innerHTML = '';
+          }
+          
+		  function clearForm()
+          {
+          var table1 = document.getElementById("autocomplete");
+          table1.innerHTML = '';
+		  cari();
+          }
+		  
+		  function clearAll()
+          {
+          var table2 = document.getElementById("autocomplete");
+          table2.innerHTML = '';
+          }
+	 
+	
+	  <!--Text Effect-->
+	jQuery(document).ready(function($) {
+	$('#texthead').textEffect({
+		effect: 'dropdown', // the type of the text aniamtion. fade, glow, jumble, slide, dropdown and random (default)
+		effectSpeed: 200, // the speed in ms at which new letters begin to animate.
+		completionSpeed: 10000, // the speed in ms of the text aniamtion.
+		jumbleColor: '#0000FF' // the color of the jumbled letters.
+	});
+	});
+	
+</script>
+</body>
+</html>
